@@ -59,6 +59,10 @@
       <f:option value="ByFullName" selected="${it.currentOrder()=='ByFullName'}">${%Full name}</f:option>
     </select>
   </f:entry>
+  
+  <f:entry title="${%Display relative Job Name?}" field="displayRelativeName">
+    <f:checkbox name="displayRelativeName" default="true"/>
+  </f:entry>
 
   </f:section>
 
