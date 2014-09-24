@@ -91,7 +91,24 @@ public class JobView {
     public String lastBuildUrl() {
         return lastBuild().url();
     }
-
+    
+    @JsonProperty
+    public String changeNumber() {
+    	return lastBuild().changeNumber();
+    }
+    
+    @JsonProperty
+    public boolean isEmptyChangeSet()
+    {
+    	return lastBuild().isEmptyChangeSet();
+    }
+    
+    @JsonProperty
+    public String changeString()
+    {
+    	return lastBuild().changeString();
+    }
+    
     @JsonProperty
     public String lastBuildDuration() {
         if (lastBuild().isRunning()) {
@@ -99,6 +116,11 @@ public class JobView {
         }
 
         return formatted(lastBuild().duration());
+    }
+    
+    @JsonProperty
+    public int changeSetCount() {
+    	return lastBuild().changeSetCount();
     }
 
     @JsonProperty
@@ -159,6 +181,11 @@ public class JobView {
     @JsonProperty
     public String claimReason() {
         return lastCompletedBuild().reasonForClaim();
+    }
+    
+    @JsonProperty
+    public int failureCount() {
+    	return lastCompletedBuild().failureCount();
     }
 
     @JsonProperty
