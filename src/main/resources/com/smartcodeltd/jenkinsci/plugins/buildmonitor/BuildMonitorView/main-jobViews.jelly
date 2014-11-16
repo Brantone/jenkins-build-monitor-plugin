@@ -11,15 +11,12 @@
         <div class="meta">
             <div class="latest-results">
                 <h2>
-                    Case Result: {{job.testCount}}/{{job.testFailCount}}
-                </h2>
-                <h2>
                     <a title="{{job.name}}"
                        href="{{job.url}}">{{job.name}}</a>
                 </h2>
-                
                 <ul class="description">
-                	<li data-ng-show="job.failureCount > 0"><strong>{{job.failureCount}}</strong> failed tests</li>
+                    <li data-ng-show="job.failureCount > 0"><strong>{{job.failureCount}}</strong> failed tests</li>
+                    <li><strong>Test Results:</strong> {{job.testCount}} / {{job.testFailCount}}</li>
                     <li data-ng-show="job.claimed">Claimed by <strong>{{ job.claimAuthor }}</strong>: {{ job.claimReason }}</li>
                 </ul>
                 <ul ng-if="job.shouldIndicateCulprits" class="culprits">
