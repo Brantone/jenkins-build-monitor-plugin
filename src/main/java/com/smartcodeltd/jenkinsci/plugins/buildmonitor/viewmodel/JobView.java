@@ -52,20 +52,20 @@ public class JobView {
         return new JobView(job, augmentor, RelativeLocation.of(job), new Date(), displayRelativeName, null, showDownstreamJobs);
     }
 
+    public static JobView of(Job<?, ?> job, BuildAugmentor augmentor, boolean displayRelativeName, Job<?, ?> upstreamJob, boolean showDownstreamJobs) {
+        return new JobView(job, augmentor, RelativeLocation.of(job), new Date(), displayRelativeName, upstreamJob, showDownstreamJobs);
+    }
+
+    public static JobView of(Job<?, ?> job, BuildAugmentor augmentor, Job<?, ?> upstreamJob, boolean showDownstreamJobs) {
+        return new JobView(job, augmentor, RelativeLocation.of(job), new Date(), true, upstreamJob, showDownstreamJobs);
+    }
+
     public static JobView of(Job<?, ?> job, RelativeLocation location) {
         return new JobView(job, new BuildAugmentor(), location, new Date(), true, null, false);
     }
 
     public static JobView of(Job<?, ?> job, Date systemTime) {
         return new JobView(job, new BuildAugmentor(), RelativeLocation.of(job), systemTime, true, null, false);
-    }
-
-    public static JobView of(Job<?, ?> job, BuildAugmentor augmentor, Job<?, ?> upstreamJob) {
-        return new JobView(job, augmentor, RelativeLocation.of(job), new Date(), true, upstreamJob, false);
-    }
-
-    public static JobView of(Job<?, ?> job, BuildAugmentor augmentor, Job<?, ?> upstreamJob, boolean showDownstreamJobs) {
-        return new JobView(job, augmentor, RelativeLocation.of(job), new Date(), true, upstreamJob, showDownstreamJobs);
     }
 
     @JsonProperty
@@ -232,6 +232,7 @@ public class JobView {
         return 0;
     }
 
+    @JsonProperty
     public boolean showDownstreamJobs() {
         return (showDownstreamJobs && (downstreamJobs.size() > 0));
     }

@@ -173,6 +173,7 @@ public class BuildMonitorView extends ListView {
 
     private JSONObject jsonFrom(List<JobView> jobViews) throws IOException {
         ObjectMapper m = new ObjectMapper();
+System.out.println("{jobs:" + m.writeValueAsString(jobViews) + "}");
         return (JSONObject) JSONSerializer.toJSON("{jobs:" + m.writeValueAsString(jobViews) + "}");
     }
 
@@ -184,11 +185,13 @@ public class BuildMonitorView extends ListView {
 
         for (AbstractProject project : projects) {
             JobView curJob = JobView.of(project, withAugmentationsIfTheyArePresent(), displayRelativeName, showDownstreamJobs);
-            
-            DependencyGraph myDependencyGraph = Hudson.getInstance().getDependencyGraph();
 
-            for (final AbstractProject<?, ?> downProj : myDependencyGraph.getDownstream(project)) {
-                curJob.addDownstreamJob(JobView.of(downProj, withAugmentationsIfTheyArePresent(), project));
+            if (showDownstreamJobs) {
+                DependencyGraph myDependencyGraph = Hudson.getInstance().getDependencyGraph();
+
+                for (final AbstractProject<?, ?> downProj : myDependencyGraph.getDownstream(project)) {
+                    curJob.addDownstreamJob(JobView.of(downProj, withAugmentationsIfTheyArePresent(), displayRelativeName, project, showDownstreamJobs));
+                }
             }
 
             jobs.add(curJob);
