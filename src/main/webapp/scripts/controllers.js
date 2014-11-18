@@ -9,9 +9,8 @@ angular.
                 fetchJobViews = proxy.buildMonitor.fetchJobViews;
 
             $scope.jobs = {};
-            //every(1000, function () {
-            every(10000000, function () {
-
+            every(2000, function () {
+            
                 return fetchJobViews().then(function (response) {
 
                     $scope.jobs = response.data.jobs;
