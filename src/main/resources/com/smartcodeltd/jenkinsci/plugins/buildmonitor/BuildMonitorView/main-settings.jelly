@@ -20,6 +20,10 @@
             <label for="settings-show-header" title="Show page header and footer">Show Header and Footer?</label>
         </li>
         <li>
+            <span class="slider-label">Nested Columns</span>
+            <slider floor="1" ceiling="4" step="1" precision="0" data-ng-model="settings.numberOfNestedColumns"></slider>
+        </li>
+        <li>
             <input data-ng-model="settings.colourBlind"
                    data-ng-false-value="0"
                    data-ng-true-value="1"
