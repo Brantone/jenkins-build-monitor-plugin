@@ -7,7 +7,10 @@ angular.
 
             $scope.settings.fontSize        = cookieJar.get('fontSize',        1);
             $scope.settings.numberOfColumns = cookieJar.get('numberOfColumns', 2);
+            $scope.settings.numberOfNestedColumns = cookieJar.get('numberOfNestedColumns', 2);
             $scope.settings.colourBlind     = cookieJar.get('colourBlind',     0);
+            $scope.settings.verbose         = cookieJar.get('verbose',         0);
+            $scope.settings.showHeader      = cookieJar.get('showHeader',      1);
 
             angular.forEach($scope.settings, function(value, name) {
                 $scope.$watch('settings.' + name, function(currentValue) {

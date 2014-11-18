@@ -15,6 +15,8 @@
                        href="{{job.url}}">{{job.name}}</a>
                 </h2>
                 <ul class="description">
+                    <li data-ng-show="job.failureCount > 0"><strong>{{job.failureCount}}</strong> failed tests</li>
+                    <li><strong>Test Results:</strong> {{job.testCount}} / {{job.testFailCount}}</li>
                     <li data-ng-show="job.claimed">Claimed by <strong>{{ job.claimAuthor }}</strong>: {{ job.claimReason }}</li>
                 </ul>
                 <ul ng-if="job.shouldIndicateCulprits" class="culprits">
@@ -23,11 +25,50 @@
                 <ul ng-if="job.hasKnownFailures" class="failures">
                     <li data-ng-repeat="name in job.knownFailures">{{name}}</li>
                 </ul>
+
+                <div class="downstream-job-views" ng-if="job.showDownstreamJobs">
+                    <ul id="job-views" class="columns-{{ settings.numberOfNestedColumns }}"
+                        data-ng-class="{ 'colour-blind-mode': settings.colourBlind == 1 }"
+                        style="font-size: {{ settings.fontSize }}em;">
+
+                        <li ng-repeat="subjob in job.downstreamJobs" class="{{subjob.status}}" id="{{ subjob.name | slugify }}">
+                            <div class="progress" style="width: {{subjob.progress}}%">
+                                <span>{{subjob.progress}}%</span>
+                            </div>
+
+                            <div class="meta">
+                                <div class="latest-results">
+                                    <h3>
+                                        <a title="{{subjob.name}}"
+                                           href="{{subjob.url}}">{{subjob.name}}</a>
+                                    </h3>
+                                    <ul ng-if="subjob.hasKnownFailures" class="failures">
+                                        <li data-ng-repeat="name in subjob.knownFailures">{{name}}</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <a data-ng-show="!!subjob.lastBuildName" class="build-name"
+                               title="Details of {{subjob.name}}, build {{subjob.lastBuildName}}"
+                               href="{{subjob.lastBuildUrl}}">{{subjob.lastBuildName}}</a>
+
+                            <div data-ng-show="!!subjob.estimatedDuration" class="build-time">
+                                <span class="elapsed" data-ng-show="subjob.progress > 0">{{subjob.lastBuildDuration}}</span>
+                                <span class="estimated">{{subjob.estimatedDuration}}</span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
             </div>
 
             <a data-ng-show="!!job.lastBuildName" class="build-name"
                title="Details of {{job.name}}, build {{job.lastBuildName}}"
-               href="{{job.lastBuildUrl}}">{{job.lastBuildName}}</a>
+               href="{{job.lastBuildUrl}}">{{job.lastBuildName}}</a> 
+            <div ng-show="settings.verbose == 1">
+	            <a ng-if="job.changeSetCount > 0" class="build-cl"
+	            	title="Details: {{job.changeString}}"
+	            	href="{{job.lastBuildUrl}}/changes">CL# {{job.changeNumber}}</a>
+	        </div>
 
             <div data-ng-show="!!job.estimatedDuration" class="build-time">
                 <span class="elapsed" data-ng-show="job.progress > 0">{{job.lastBuildDuration}}</span>

@@ -2,9 +2,13 @@ package com.smartcodeltd.jenkinsci.plugins.buildmonitor.viewmodel;
 
 import com.smartcodeltd.jenkinsci.plugins.buildmonitor.facade.RelativeLocation;
 import com.smartcodeltd.jenkinsci.plugins.buildmonitor.viewmodel.plugins.BuildAugmentor;
+import hudson.model.AbstractBuild;
+import hudson.model.Cause;
+import hudson.model.CauseAction;
 import hudson.model.Job;
 import hudson.model.Result;
 import hudson.model.Run;
+import hudson.tasks.test.AbstractTestResultAction;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 import java.util.*;
@@ -19,33 +23,58 @@ public class JobView {
     private final Job<?, ?> job;
     private final BuildAugmentor augmentor;
     private final RelativeLocation relative;
+    private final boolean displayRelativeName;
+    private final boolean showDownstreamJobs;
+    private final List<JobView> downstreamJobs;
+    private final Job<?, ?> upstreamJob;
 
     private final static Map<Result, String> statuses = new HashMap<Result, String>() {{
         put(SUCCESS,   "successful");
         put(UNSTABLE,  "unstable");
         put(FAILURE,   "failing");
+        put(NOT_BUILT, "not-built");
         put(ABORTED,   "failing");  // if someone has aborted it then something is clearly not right, right? :)
     }};
 
     public static JobView of(Job<?, ?> job) {
-        return new JobView(job, new BuildAugmentor(), RelativeLocation.of(job), new Date());
+        return new JobView(job, new BuildAugmentor(), RelativeLocation.of(job), new Date(), true, null, false);
     }
 
     public static JobView of(Job<?, ?> job, BuildAugmentor augmentor) {
-        return new JobView(job, augmentor, RelativeLocation.of(job), new Date());
+        return new JobView(job, augmentor, RelativeLocation.of(job), new Date(), true, null, false);
+    }
+
+    public static JobView of(Job<?, ?> job, BuildAugmentor augmentor, boolean displayRelativeName) {
+        return new JobView(job, augmentor, RelativeLocation.of(job), new Date(), displayRelativeName, null, false);
+    }
+
+    public static JobView of(Job<?, ?> job, BuildAugmentor augmentor, boolean displayRelativeName, boolean showDownstreamJobs) {
+        return new JobView(job, augmentor, RelativeLocation.of(job), new Date(), displayRelativeName, null, showDownstreamJobs);
+    }
+
+    public static JobView of(Job<?, ?> job, BuildAugmentor augmentor, boolean displayRelativeName, Job<?, ?> upstreamJob, boolean showDownstreamJobs) {
+        return new JobView(job, augmentor, RelativeLocation.of(job), new Date(), displayRelativeName, upstreamJob, showDownstreamJobs);
+    }
+
+    public static JobView of(Job<?, ?> job, BuildAugmentor augmentor, Job<?, ?> upstreamJob, boolean showDownstreamJobs) {
+        return new JobView(job, augmentor, RelativeLocation.of(job), new Date(), true, upstreamJob, showDownstreamJobs);
     }
 
     public static JobView of(Job<?, ?> job, RelativeLocation location) {
-        return new JobView(job, new BuildAugmentor(), location, new Date());
+        return new JobView(job, new BuildAugmentor(), location, new Date(), true, null, false);
     }
 
     public static JobView of(Job<?, ?> job, Date systemTime) {
-        return new JobView(job, new BuildAugmentor(), RelativeLocation.of(job), systemTime);
+        return new JobView(job, new BuildAugmentor(), RelativeLocation.of(job), systemTime, true, null, false);
     }
 
     @JsonProperty
     public String name() {
-        return relative.name();
+        if (displayRelativeName){
+            return relative.name();
+        } else {
+            return job.getDisplayName();
+        }
     }
 
     @JsonProperty
@@ -81,7 +110,24 @@ public class JobView {
     public String lastBuildUrl() {
         return lastBuild().url();
     }
-
+    
+    @JsonProperty
+    public String changeNumber() {
+    	return lastBuild().changeNumber();
+    }
+    
+    @JsonProperty
+    public boolean isEmptyChangeSet()
+    {
+    	return lastBuild().isEmptyChangeSet();
+    }
+    
+    @JsonProperty
+    public String changeString()
+    {
+    	return lastBuild().changeString();
+    }
+    
     @JsonProperty
     public String lastBuildDuration() {
         if (lastBuild().isRunning()) {
@@ -89,6 +135,11 @@ public class JobView {
         }
 
         return formatted(lastBuild().duration());
+    }
+    
+    @JsonProperty
+    public int changeSetCount() {
+    	return lastBuild().changeSetCount();
     }
 
     @JsonProperty
@@ -145,6 +196,11 @@ public class JobView {
     public String claimReason() {
         return lastCompletedBuild().reasonForClaim();
     }
+    
+    @JsonProperty
+    public int failureCount() {
+    	return lastCompletedBuild().failureCount();
+    }
 
     @JsonProperty
     public boolean hasKnownFailures() {
@@ -156,19 +212,82 @@ public class JobView {
         return lastCompletedBuild().knownFailures();
     }
 
+    @JsonProperty
+    public int testCount() {
+        Run<?, ?> run = job.getLastBuild();
+        if (run != null) {
+            AbstractTestResultAction<?> tests = run.getAction(AbstractTestResultAction.class);
+            return tests != null ? tests.getTotalCount() : 0;
+        }
+        return 0;
+    }
+
+    @JsonProperty
+    public int testFailCount() {
+        Run<?, ?> run = job.getLastBuild();
+        if (run != null) {
+            AbstractTestResultAction<?> tests = run.getAction(AbstractTestResultAction.class);
+            return tests != null ? tests.getFailCount() : 0;
+        }
+        return 0;
+    }
+
+    @JsonProperty
+    public boolean showDownstreamJobs() {
+        return (showDownstreamJobs && (downstreamJobs.size() > 0));
+    }
+
+    @JsonProperty
+    public List<JobView> downstreamJobs() {
+        return downstreamJobs;
+    }
+
     public String toString() {
         return name();
     }
 
+    public void addDownstreamJob(JobView downstreamJob) {
+        this.downstreamJobs.add(downstreamJob);
+    }
 
-    private JobView(Job<?, ?> job, BuildAugmentor augmentor, RelativeLocation relative, Date systemTime) {
+    private JobView(Job<?, ?> job, BuildAugmentor augmentor, RelativeLocation relative, Date systemTime, Boolean displayRelativeName, Job<?, ?> upstreamJob, boolean showDownstreamJobs) {
         this.job        = job;
         this.augmentor  = augmentor;
         this.systemTime = systemTime;
         this.relative   = relative;
+        this.displayRelativeName = displayRelativeName;
+        this.upstreamJob = upstreamJob;
+        this.showDownstreamJobs = showDownstreamJobs;
+        this.downstreamJobs = new ArrayList<JobView>();
     }
 
     private BuildViewModel lastBuild() {
+        // If this has upstreamJob, it's presumed user wants build attached by project, not last overall
+        if (upstreamJob != null) {
+
+            AbstractBuild<?, ?> upstreamBuild = (AbstractBuild) upstreamJob.getLastBuild();
+            if (upstreamJob.getLastBuild() != null) {
+
+                @SuppressWarnings("unchecked")
+                final List<AbstractBuild<?, ?>> thisBuilds = (List<AbstractBuild<?, ?>>) job.getBuilds();
+
+                for (final AbstractBuild<?, ?> innerBuild : thisBuilds) {
+                    for (final CauseAction action : innerBuild.getActions(CauseAction.class)) {
+                        for (final Cause cause : action.getCauses()) {
+                            if (cause instanceof Cause.UpstreamCause) {
+                                final Cause.UpstreamCause upstreamCause = (Cause.UpstreamCause) cause;
+                                if (upstreamCause.getUpstreamProject().equals(upstreamBuild.getProject().getFullName())
+                                        && (upstreamCause.getUpstreamBuild() == upstreamBuild.getNumber())) {
+                                    return buildViewOf(innerBuild);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return buildViewOf(null);
+        }
+
         return buildViewOf(job.getLastBuild());
     }
 
@@ -186,6 +305,6 @@ public class JobView {
             return new NullBuildView();
         }
 
-        return BuildView.of(job.getLastBuild(), augmentor, relative, systemTime);
+        return BuildView.of(build, augmentor, relative, systemTime);
     }
 }
