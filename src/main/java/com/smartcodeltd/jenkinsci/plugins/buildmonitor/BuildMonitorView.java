@@ -173,7 +173,6 @@ public class BuildMonitorView extends ListView {
 
     private JSONObject jsonFrom(List<JobView> jobViews) throws IOException {
         ObjectMapper m = new ObjectMapper();
-System.out.println("{jobs:" + m.writeValueAsString(jobViews) + "}");
         return (JSONObject) JSONSerializer.toJSON("{jobs:" + m.writeValueAsString(jobViews) + "}");
     }
 
@@ -187,9 +186,7 @@ System.out.println("{jobs:" + m.writeValueAsString(jobViews) + "}");
             JobView curJob = JobView.of(project, withAugmentationsIfTheyArePresent(), displayRelativeName, showDownstreamJobs);
 
             if (showDownstreamJobs) {
-                DependencyGraph myDependencyGraph = Hudson.getInstance().getDependencyGraph();
-
-                for (final AbstractProject<?, ?> downProj : myDependencyGraph.getDownstream(project)) {
+                for (final AbstractProject<?, ?> downProj : getDownstreamProjects(project)) {
                     curJob.addDownstreamJob(JobView.of(downProj, withAugmentationsIfTheyArePresent(), displayRelativeName, project, showDownstreamJobs));
                 }
             }
@@ -202,5 +199,20 @@ System.out.println("{jobs:" + m.writeValueAsString(jobViews) + "}");
 
     private BuildAugmentor withAugmentationsIfTheyArePresent() {
         return BuildAugmentor.fromDetectedPlugins();
+    }
+
+    private List<AbstractProject<?, ?>> getDownstreamProjects(AbstractProject<?, ?> curProject) {
+        final DependencyGraph myDependencyGraph = Hudson.getInstance().getDependencyGraph();
+        final List<AbstractProject<?, ?>> downstreamProjectsList = new ArrayList<AbstractProject<?, ?>>();
+
+        for (AbstractProject<?, ?> downProj : myDependencyGraph.getDownstream(curProject)) {
+            downstreamProjectsList.add(downProj);
+
+            // Next level
+            for (AbstractProject<?, ?> recurseProj : this.getDownstreamProjects(downProj)) {
+                System.out.println("Proj name: " + recurseProj.getName());
+            }
+        }
+        return downstreamProjectsList;
     }
 }
