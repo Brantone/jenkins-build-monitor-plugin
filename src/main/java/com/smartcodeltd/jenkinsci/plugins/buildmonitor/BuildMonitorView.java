@@ -210,7 +210,7 @@ public class BuildMonitorView extends ListView {
 
             // Next level
             for (AbstractProject<?, ?> recurseProj : this.getDownstreamProjects(downProj)) {
-                System.out.println("Proj name: " + recurseProj.getName());
+            //    System.out.println("Proj name: " + recurseProj.getName());
             }
         }
         return downstreamProjectsList;
