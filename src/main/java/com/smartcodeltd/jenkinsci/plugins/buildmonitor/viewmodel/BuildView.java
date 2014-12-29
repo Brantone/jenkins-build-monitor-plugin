@@ -11,9 +11,11 @@ import hudson.model.User;
 import hudson.plugins.perforce.PerforceChangeLogEntry;
 import hudson.plugins.perforce.PerforceChangeLogSet;
 import hudson.scm.ChangeLogSet;
+import hudson.Util;
 import hudson.tasks.junit.TestResultAction;
 
 import java.util.Date;
+import java.text.DateFormat;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -76,6 +78,12 @@ public class BuildView implements BuildViewModel {
     @Override
     public Duration estimatedDuration() {
         return new Duration(build.getEstimatedDuration());
+    }
+
+    @Override
+    public String startDateTime() {
+//        return DateFormat.getDateInstance(DateFormat.FULL).format(build.getTime()) + " " + DateFormat.getTimeInstance(DateFormat.SHORT).format(build.getTime());
+        return Util.getPastTimeString(System.currentTimeMillis()-build.getStartTimeInMillis());
     }
 
     @Override

@@ -147,6 +147,11 @@ public class JobView {
         return formatted(lastBuild().estimatedDuration());
     }
 
+    @JsonProperty
+    public String startDateTime() {
+        return lastBuild().startDateTime();
+    }
+
     private String formatted(Duration duration) {
         return null != duration
                 ? duration.toString()

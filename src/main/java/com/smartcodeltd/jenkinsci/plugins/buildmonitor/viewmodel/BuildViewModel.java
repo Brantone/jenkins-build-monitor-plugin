@@ -14,6 +14,7 @@ public interface BuildViewModel {
     public Duration elapsedTime();
     public Duration duration();
     public Duration estimatedDuration();
+    public String startDateTime();
     public int progress();
 
     public boolean hasPreviousBuild();

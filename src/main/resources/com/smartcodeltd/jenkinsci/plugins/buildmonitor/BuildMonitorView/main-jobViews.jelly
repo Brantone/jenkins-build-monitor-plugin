@@ -63,7 +63,7 @@
 
             <a data-ng-show="!!job.lastBuildName" class="build-name"
                title="Details of {{job.name}}, build {{job.lastBuildName}}"
-               href="{{job.lastBuildUrl}}">{{job.lastBuildName}}</a> 
+               href="{{job.lastBuildUrl}}">{{job.lastBuildName}}<span ng-show="settings.verbose == 1" class="build-start"> - {{job.startDateTime}}</span></a> 
             <div ng-show="settings.verbose == 1">
 	            <a ng-if="job.changeSetCount > 0" class="build-cl"
 	            	title="Details: {{job.changeString}}"

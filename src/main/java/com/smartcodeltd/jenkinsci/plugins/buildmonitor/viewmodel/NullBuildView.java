@@ -44,6 +44,11 @@ public class NullBuildView implements BuildViewModel {
     }
 
     @Override
+    public String startDateTime() {
+        return "";
+    }
+
+    @Override
     public int progress() {
         return 0;
     }
