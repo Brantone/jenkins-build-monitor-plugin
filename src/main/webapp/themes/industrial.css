@@ -214,6 +214,7 @@ h2 {
 }
 
 .build-monitor #job-views .build-name { font-size: 2em; line-height: 1.75em; }
+.build-monitor #job-views .build-start { font-size: 0.6em; line-height: 1.75em; }
 .build-monitor #job-views .build-cl { font-size: 2em; line-height: 1.75em; }
 .build-monitor #job-views .build-time { font-size: 2em; line-height: 1.75em; }
 .build-monitor #job-views .build-time>.elapsed       { font-size: 1.0em; color:rgba(255,255,255,0.7); }
